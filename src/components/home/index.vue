@@ -1,11 +1,15 @@
 <template>
     <div class="homePage">
-        <div>公司组织架构图</div>
-        <div>
-            <v-exportData @exportData="getResult"></v-exportData>
-        </div>
-        <div>
-
+        <div class="title">公司组织架构图</div>
+        <div class="content">
+            <div class="fnBtns">
+                <a class="sin-btn" href="static/temp/组织架构图模版.xlsx" download="组织架构图模版">下载模版</a>
+                <v-exportData @exportData="getResult"></v-exportData>
+            </div>
+            <div>成功导入 {{resultData.length}} 条数据</div>
+            <div class="organization-chart">
+                <v-chart :data="resultData"></v-chart>
+            </div>
         </div>
     </div>
 </template>
@@ -13,15 +17,16 @@
 <script>
 import XLSX from 'xlsx';
 import vExportData from './tools/exportData';
+import vChart from './tools/organizationChart';
 export default {
     name: "homePage",
     data() {
         return {
-            msg: "Welcome to Your Vue.js App"
+            resultData: [], // Excel导入结果
         };
     },
     components: {
-        vExportData
+        vExportData, vChart
     },
     watch:{
         // dataList:{
@@ -35,6 +40,7 @@ export default {
     },
     methods: {
         getResult(data) {
+            this.resultData = data||[];
             console.log(data);
         },
     },
@@ -50,5 +56,20 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="less">
+.homePage {
+    .title {
+        text-align: center;
+        padding: 20px;
+        font-size: 20px;
+    }
+    .content {
+        .fnBtns {
+
+        }
+        .organization-chart {
+            
+        }
+    }
+}
 </style>

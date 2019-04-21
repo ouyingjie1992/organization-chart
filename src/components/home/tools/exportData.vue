@@ -14,7 +14,6 @@ export default {
     },
     data() {
         return {
-            msg: "Welcome to Your Vue.js App"
         };
     },
     watch:{
@@ -83,15 +82,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
 .exportData {
+    display: inline-block;
     .exportDataInput {
         display: none;
     }
-}
-.sin-btn {
-    border: 1px solid #ccc;
-    padding: 5px 10px;
-    border-radius: 3px;
-    background-color: #fff;
-    cursor: pointer;
 }
 </style>
