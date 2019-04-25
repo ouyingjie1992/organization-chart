@@ -1,5 +1,5 @@
 <template>
-    <div class="organizationChart" id="organizationChart"></div>
+    <div class="organizationChart" id="organizationChart" ref="organizationChart"></div>
 </template>
 
 <script>
@@ -9,113 +9,30 @@ export default {
     props: ["data"],
     data() {
         return {
-            dataList: {
-                name: "中国",
-                children: [
-                    {
-                        name: "浙江",
-                        children: [
-                            {
-                                name: "杭州"
-                            },
-                            {
-                                name: "宁波"
-                            },
-                            {
-                                name: "温州"
-                            },
-                            {
-                                name: "绍兴"
-                            }
-                        ]
-                    },
-
-                    {
-                        name: "广西",
-                        children: [
-                            {
-                                name: "桂林",
-                                children: [
-                                    {
-                                        name: "秀峰区"
-                                    },
-                                    {
-                                        name: "叠彩区"
-                                    },
-                                    {
-                                        name: "象山区"
-                                    },
-                                    {
-                                        name: "七星区"
-                                    }
-                                ]
-                            },
-                            {
-                                name: "南宁"
-                            },
-                            {
-                                name: "柳州"
-                            },
-                            {
-                                name: "防城港"
-                            }
-                        ]
-                    },
-
-                    {
-                        name: "黑龙江",
-                        children: [
-                            {
-                                name: "哈尔滨"
-                            },
-                            {
-                                name: "齐齐哈尔"
-                            },
-                            {
-                                name: "牡丹江"
-                            },
-                            {
-                                name: "大庆"
-                            }
-                        ]
-                    },
-
-                    {
-                        name: "新疆",
-                        children: [
-                            {
-                                name: "乌鲁木齐"
-                            },
-                            {
-                                name: "克拉玛依"
-                            },
-                            {
-                                name: "吐鲁番"
-                            },
-                            {
-                                name: "哈密"
-                            }
-                        ]
-                    }
-                ]
-            }
+            dataList: {}
         };
     },
     watch: {
-        // dataList:{
-        //     immediate:true,
-        //     handler:function(val){
-        //         this.list = val;
-        //     }
-        // },
+        data:{
+            immediate:true,
+            handler:function(val){
+                this.dataList = val;
+                this.initChart();
+            }
+        },
     },
     filters: {},
     methods: {
         initChart() {
             const width = 1000;
             const height = 500;
-            const boxWidth = 65,
+            const boxWidth = 100,
                 boxHeight = 40;
+            // 清空画布
+            if(this.$refs.organizationChart != null) {
+                this.$refs.organizationChart.innerHTML = '';
+            }
+
             var tree = d3.layout
                 .tree()
                 .size([width, height - 200])
@@ -152,9 +69,6 @@ export default {
 
             var nodes = tree.nodes(this.dataList);
             var links = tree.links(nodes);
-
-            console.log(nodes);
-            console.log(links);
 
             // var link = svg.selectAll(".link")
             //  .data(links)
@@ -234,7 +148,6 @@ export default {
             //  });
             // 绘制矩形与文字
             drawRect();
-
             function drawRect() {
                 node.append("rect")
                     .attr("y", 0)
@@ -244,6 +157,7 @@ export default {
                             : -(boxHeight / 2);
                     })
                     .attr("width", function(d) {
+                        console.log(d)
                         return d.depth !== 2 ? boxWidth : boxHeight;
                     })
                     .attr("height", function(d) {
@@ -274,7 +188,7 @@ export default {
                         return d.depth !== 2 ? "middle" : "start";
                     })
                     .text(function(d) {
-                        return d.name;
+                        return d.post + ' ' + d.fullName;
                     });
             }
         }

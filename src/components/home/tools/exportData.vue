@@ -14,6 +14,8 @@ export default {
     },
     data() {
         return {
+            exportDataArr: [], //Excel文件解析数据
+            usedArr: [], //已经被使用过的数据
         };
     },
     watch:{
@@ -61,12 +63,74 @@ export default {
                     });
                     outdata = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                     // 自定义方法向父组件传递数据
-                    that.$emit("exportData", outdata);
+                    that.$emit("exportData", that.initData(outdata));
                 };
                 reader.readAsArrayBuffer(f);
             };
             reader.readAsBinaryString(f);
         },
+        // 格式化数据
+        initData(data) {
+            let result = {};
+            let resultNameArr = [];
+            // 根节点-最高领导
+            let leader = null;
+            if(data != null) {
+                for(let i=0; i<data.length; i++) {
+                    let item = this.formatDataName(data[i]);
+                    this.exportDataArr.push(item);
+                    if(item.directSuperior==null || item.directSuperior==='') {
+                        leader = item;
+                    }
+                }
+                this.usedArr.push(leader.fullName);
+                leader.children = this.findChildren(leader.fullName);
+                result = leader;
+            }
+            return result;
+        },
+        // 寻找子节点
+        findChildren(name) {
+            let children = [];
+            for(let i=0; i<this.exportDataArr.length; i++) {
+                let item = this.exportDataArr[i];
+                // 使用过的数据无需再检测
+                if(this.usedArr.indexOf(item.fullName) != -1) {
+                    continue;
+                }
+                // 判断是否为子节点
+                if(item.directSuperior === name) {
+                    let thisName = item.fullName;
+                    item.children = this.findChildren(thisName);
+                    children.push(item);
+                    this.usedArr.push(thisName);
+                }
+            }
+            return children;
+        },
+        // 格式化字段名称
+        formatDataName(data) {
+            let resultData = {
+                'jobNumber': data['工号'],
+                'fullName': data['姓名'],
+                'firstLevelDepartment': data['一级部门'],
+                'twoLevelDepartment': data['二级部门'],
+                'threeLevelDepartment': data['三级部门'],
+                'fourLevelDepartment': data['四级部门'],
+                'post': data['任职职位'],
+                'dateOfEntry': data['入职日期'],
+                'workingPlace': data['工作地点'],
+                'directSuperior': data['直接上级'],
+                'currentMonthlySalary': data['目前月薪'],
+                'abilityLevel': data['能力等级'],
+                'lastYearPerformance': data['上年度绩效'],
+                'Q1': data['Q1绩效'],
+                'Q2': data['Q2绩效'],
+                'Q3': data['Q3绩效'],
+                'Annual': data['年度绩效']
+            };
+            return resultData;
+        }
     },
     computed: {
     },
