@@ -10,7 +10,7 @@ import XLSX from 'xlsx';
 export default {
     name: "exportData",
     model: {
-        event: 'exportData'
+        event: 'postData'
     },
     data() {
         return {
@@ -32,6 +32,8 @@ export default {
         // 上传文件按钮
         loadFileBtn() {
             this.$refs.exportDataInput.value = '';
+            this.exportDataArr = [];
+            this.usedArr = [];
             this.$refs.exportDataInput.click();
         },
         // 解析上传文件
@@ -63,7 +65,11 @@ export default {
                     });
                     outdata = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                     // 自定义方法向父组件传递数据
-                    that.$emit("exportData", that.initData(outdata));
+                    let result = {
+                        data: that.initData(outdata),
+                        total: that.exportDataArr.length
+                    };
+                    that.$emit("postData", result);
                 };
                 reader.readAsArrayBuffer(f);
             };

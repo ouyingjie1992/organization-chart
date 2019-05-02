@@ -24,7 +24,7 @@ export default {
     filters: {},
     methods: {
         initChart() {
-            const width = 1000;
+            const width = this.calMaxWidth(this.dataList);
             const height = 500;
             const boxWidth = 100,
                 boxHeight = 40;
@@ -32,7 +32,9 @@ export default {
             if(this.$refs.organizationChart != null) {
                 this.$refs.organizationChart.innerHTML = '';
             }
-
+            if(this.dataList==null || this.dataList.fullName==null) {
+                return;
+            }
             var tree = d3.layout
                 .tree()
                 .size([width, height - 200])
@@ -152,16 +154,13 @@ export default {
                 node.append("rect")
                     .attr("y", 0)
                     .attr("x", function(d) {
-                        return d.depth !== 2
-                            ? -(boxWidth / 2)
-                            : -(boxHeight / 2);
+                        return -((d.post + ' ' + d.fullName).length * 12 / 2);
                     })
                     .attr("width", function(d) {
-                        console.log(d)
-                        return d.depth !== 2 ? boxWidth : boxHeight;
+                        return (d.post + ' ' + d.fullName).length * 12;
                     })
                     .attr("height", function(d) {
-                        return d.depth !== 2 ? boxHeight : boxWidth;
+                        return boxHeight;
                     })
                     // 矩形背景色以及边框颜色宽度
                     .attr("fill", "#fff")
@@ -174,23 +173,55 @@ export default {
                 // Draw the person's name and position it inside the box
                 node.append("text")
                     .attr("y", function(d) {
-                        return d.depth !== 2 ? boxHeight / 2 + 5 : 0;
+                        return boxHeight / 2 + 5;
                     })
                     // .attr('rotate', function (d) { //显示竖直显示中文时rotate为0，英文-90
                     //     return 0;
                     // })
                     .attr("style", function(d) {
-                        return d.depth !== 2
-                            ? ""
-                            : "writing-mode: tb;letter-spacing:0px";
+                        return "";
                     })
                     .attr("text-anchor", function(d) {
-                        return d.depth !== 2 ? "middle" : "start";
+                        return "middle";
                     })
                     .text(function(d) {
                         return d.post + ' ' + d.fullName;
                     });
             }
+        },
+        calMaxWidth(data) {
+            // 画布最小宽度
+            const minWidth = 800;
+            // 计算画布宽度=所有末节点的宽度相加
+            let maxWidth = 0;
+            // 单个节点的文字定宽
+            const fontWidth = 13;
+            // 节点间的预留间距
+            const nodeMargin = 0;
+            let number = 0;
+            // 同级节点文案最大长度
+            let itemLength = 0;
+            const fn = (data) => {
+                for(let i=0; i<data.children.length; i++) {
+                    let item = data.children[i];
+                    if(item.children==null || item.children.length===0) {
+                        itemLength = itemLength<this.getTitle(item).length ? this.getTitle(item).length:itemLength;
+                        number++;
+                    } else {
+                        fn(item);
+                    }
+                }
+            };
+
+            if(data.children!=null && data.children.length>0) {
+                fn(data);
+            }
+            maxWidth = maxWidth + number*(fontWidth*itemLength+nodeMargin);
+            return Math.max(maxWidth, minWidth);
+        },
+        // 节点第一行展示信息
+        getTitle(d) {
+            return d.post + ' ' + d.fullName;
         }
     },
     computed: {},

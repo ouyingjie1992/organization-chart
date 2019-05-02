@@ -4,9 +4,9 @@
         <div class="content">
             <div class="fnBtns">
                 <a class="sin-btn" href="static/temp/组织架构图模版.xlsx" download="组织架构图模版">下载模版</a>
-                <v-exportData @exportData="getResult"></v-exportData>
+                <v-exportData @postData="getResult"></v-exportData>
             </div>
-            <div>成功导入 {{resultData.length}} 条数据</div>
+            <div>成功导入 {{total}} 条数据</div>
             <div class="organization-chart">
                 <v-chart :data="resultData"></v-chart>
             </div>
@@ -22,7 +22,8 @@ export default {
     name: "homePage",
     data() {
         return {
-            resultData: [], // Excel导入结果
+            resultData: {}, // Excel导入结果
+            total: 0, //成功导入多少条数据
         };
     },
     components: {
@@ -39,9 +40,9 @@ export default {
     filters:{
     },
     methods: {
-        getResult(data) {
-            this.resultData = data||[];
-            console.log(data);
+        getResult(result) {
+            this.resultData = result.data||[];
+            this.total = result.total;
         },
     },
     computed: {
