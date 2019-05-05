@@ -1,5 +1,8 @@
 <template>
-    <div class="organizationChart" id="organizationChart" ref="organizationChart"></div>
+    <div class="organizationChart">
+        <div class="organizationChart-canvas" id="organizationChart" ref="organizationChart"></div>
+        <div class="organizationChart-canvas2" id="organizationChart2" ref="organizationChart2"></div>
+    </div>
 </template>
 
 <script>
@@ -12,27 +15,19 @@ export default {
             dataList: {},
             height: 500,
             width: 800,
-            boxHeight: 100,
-            lineHeight: 20,
             // 单个节点的文字定宽
-            fontWidth: 13,
+            fontSize: 16,
             boxPadding: 10,
             textArr: [
                 {
                     title: '工号',
                     value: 'jobNumber'
                 },{
-                    title: '一级部门',
-                    value: 'firstLevelDepartment'
+                    title: '出生日期',
+                    value: 'birthday'
                 },{
-                    title: '二级部门',
-                    value: 'twoLevelDepartment'
-                },{
-                    title: '三级部门',
-                    value: 'threeLevelDepartment'
-                },{
-                    title: '四级部门',
-                    value: 'fourLevelDepartment'
+                    title: '学历',
+                    value: 'education'
                 },{
                     title: '入职日期',
                     value: 'dateOfEntry'
@@ -49,20 +44,8 @@ export default {
                     title: '能力等级',
                     value: 'abilityLevel'
                 },{
-                    title: '上年度绩效',
-                    value: 'lastYearPerformance'
-                },{
-                    title: 'Q1绩效',
-                    value: 'Q1'
-                },{
-                    title: 'Q2绩效',
-                    value: 'Q2'
-                },{
-                    title: 'Q3绩效',
-                    value: 'Q3'
-                },{
-                    title: '年度绩效',
-                    value: 'Annual'
+                    title: '绩效',
+                    value: 'performance'
                 }
             ]
         };
@@ -74,17 +57,25 @@ export default {
                 this.dataList = val;
                 this.height = this.calMaxHeight();
                 this.width = this.calMaxWidth();
-                this.initChart();
+                this.loadChart();
             }
         },
     },
     filters: {},
     methods: {
-        initChart() {
+        loadChart() {
+            this.fontSize = 16;
+            this.initChart('organizationChart');
+            this.$nextTick(()=>{
+                this.fontSize = 26;
+                this.initChart('organizationChart2');
+            });
+        },
+        initChart(ele) {
             const _this = this;
             // 清空画布
-            if(this.$refs.organizationChart != null) {
-                this.$refs.organizationChart.innerHTML = '';
+            if(this.$refs[ele] != null) {
+                this.$refs[ele].innerHTML = '';
             }
             if(this.dataList==null || this.dataList.fullName==null) {
                 return;
@@ -103,22 +94,24 @@ export default {
             // 用来拖拽图以及扩大缩放
             var zoom = d3.behavior
                 .zoom()
-                .scaleExtent([0.1, 1])
+                .scaleExtent([0.1, 10])
                 .on("zoom", function() {
                     svg.attr(
                         "transform",
                         "translate(" +
-                            d3.event.translate +
-                            ") scale(" +
+                            d3.event.translate +")"
+                            +" scale(" +
                             d3.event.scale +
                             ")"
                     );
                 });
             var svg = d3
-                .select("#organizationChart")
+                .select("#"+ele)
                 .append("svg")
                 .attr("width", this.width + 80) // 画布扩大，防止边缘文字被遮挡
-                .attr("height", this.height + 200)
+                .attr("height", this.height + this.calNodeHeight()*2)
+                .attr("xmlns", "http://www.w3.org/2000/svg")
+                .attr("version", 1.1)  
                 .append("g")
                 .call(zoom) // 相当于zoom（svg）
                 .attr("transform", "translate(40,200)"); // 将图整体下移，以防止顶部节点被遮挡
@@ -148,7 +141,7 @@ export default {
                 // Add new links
                 link.enter()
                     .append("path")
-                    .attr("class", "link");
+                    .attr("style", "fill: none;stroke: #ccc;stroke-width: 1.5px;");
 
                 // Remove any links we don't need anymore
                 // if part of the tree was collapsed
@@ -182,9 +175,9 @@ export default {
                 .data(nodes)
                 .enter()
                 .append("g")
-                .attr("class", "node")
+                .attr("style", "font: "+this.fontSize+"px sans-serif;")
                 .attr("transform", function(d) {
-                    return "translate(" + d.x + "," + (d.y-200) + ")"; // edited
+                    return "translate(" + d.x + "," + (d.y-100) + ")"; // edited
                 });
 
             // 绘制矩形与文字
@@ -228,7 +221,7 @@ export default {
             // 计算画布高度=结构层级数*(单个宽高+预留连线距离)
             let maxHeight = 0;
             // 预留连线距离
-            const nodeMargin = 200;
+            let nodeMargin = 200;
             let number = 0;
 
             var num = 0;
@@ -245,7 +238,8 @@ export default {
                 }
             };
             recursion(data, 1);
-            maxHeight = LevelLength * (nodeMargin + this.boxHeight);
+            // nodeMargin = this.boxHeight * 2;
+            maxHeight = LevelLength * (nodeMargin + this.calNodeHeight());
 
             return Math.max(maxHeight, minHeight);
         },
@@ -265,7 +259,7 @@ export default {
                     return _this.calNodeWidth(d);
                 })
                 .attr("height", function(d) {
-                    return _this.boxHeight;
+                    return _this.calNodeHeight();
                 })
                 // 矩形背景色以及边框颜色宽度
                 .attr("fill", "#fff")
@@ -278,10 +272,10 @@ export default {
             // 新增text
             node.append("text")
                 .attr("y", function(d) {
-                    return _this.lineHeight;
+                    return (_this.fontSize+4);
                 })
                 .attr("style", function(d) {
-                    return "";
+                    return "font-weight: bold;";
                 })
                 .attr("text-anchor", function(d) {
                     return "middle";
@@ -306,7 +300,7 @@ export default {
                     });
             };
             for(let i=0; i<this.textArr.length; i++) {
-                let lineHeight = this.lineHeight * (i+2);
+                let lineHeight = (this.fontSize+4) * (i+2);
                 addText(node, lineHeight, i);
             }
         },
@@ -319,18 +313,17 @@ export default {
             }
             maxWidth = Math.max(maxWidth, (d.post + ' ' + d.fullName).length);
             // 最大字数 * 单个字宽 + 内边距
-            return maxWidth * this.fontWidth + this.boxPadding * 2;
+            return maxWidth * (this.fontSize+1) + this.boxPadding * 2;
         },
         // 计算单个矩形高度
         calNodeHeight() {
             // 信息行数 * 行高 + 内边距
-            return (this.textArr.length+1) * this.lineHeight + 20;
-        }
+            return (this.textArr.length+1) * (this.fontSize+4) + 20;
+        },
     },
     computed: {},
     mounted() {
-        this.initChart();
-        this.boxHeight = this.calNodeHeight();
+        this.loadChart();
     },
     created() {},
     destroyed() {}
@@ -338,24 +331,27 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="less">
+<style lang="less" scope>
 .organizationChart {
-    width: 1000px;
-    height: 500px;
-    .node circle {
-        fill: #fff;
-        stroke: steelblue;
-        stroke-width: 1.5px;
-    }
+    position: relative;
 
-    .node {
-        font: 12px sans-serif;
+    .organizationChart-canvas {
+        width: 1000px;
+        height: 500px;
+        position: absolute;
+        // .node circle {
+            // fill: #fff;
+            // stroke: steelblue;
+            // stroke-width: 1.5px;
+        // }
     }
-
-    .link {
-        fill: none;
-        stroke: #ccc;
-        stroke-width: 1.5px;
+    .organizationChart-canvas2 {
+        width: 0;
+        height: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+        background-color: #333;
     }
 }
 </style>

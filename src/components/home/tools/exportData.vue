@@ -124,18 +124,31 @@ export default {
                 'threeLevelDepartment': data['三级部门'],
                 'fourLevelDepartment': data['四级部门'],
                 'post': data['任职职位'],
-                'dateOfEntry': data['入职日期'],
+                'birthday': this.formatDate(data['出生日期']),
+                'education': (data['学历']||'-')+(data['院校层级']||'-')+(data['毕业时间']||'-'),
+                'dateOfEntry': this.formatDate(data['入职日期']),
                 'workingPlace': data['工作地点'],
                 'directSuperior': data['直接上级'],
                 'currentMonthlySalary': data['目前月薪'],
                 'abilityLevel': data['能力等级'],
-                'lastYearPerformance': data['上年度绩效'],
-                'Q1': data['Q1绩效'],
-                'Q2': data['Q2绩效'],
-                'Q3': data['Q3绩效'],
-                'Annual': data['年度绩效']
+                'performance': '0'+(data['上年度绩效']||'-')+'1'+(data['Q1绩效']||'-')+'2'+(data['Q2绩效']||'-')+'3'+(data['Q3绩效']||'-')+'4'+(data['年度绩效']||'-'),
             };
             return resultData;
+        },
+        // 日期格式转化
+        formatDate(numb, format) {
+            if(numb == null) {
+                return '-';
+            }
+            let time = new Date(1900, 0, numb);
+            time.setDate(time.getDate() - 1);
+            let year = time.getFullYear() + '';
+            let month = time.getMonth() + 1 + '';
+            let date = time.getDate() + '';
+            if(format && format.length === 1) {
+                return year + format + month + format + date;
+            }
+            return year+(month < 10 ? '0' + month : month)+(date < 10 ? '0' + date : date);
         }
     },
     computed: {
