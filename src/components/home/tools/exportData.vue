@@ -1,7 +1,8 @@
 <template>
     <div class="exportData">
-        <input ref="exportDataInput" type="file" @change="exportData" class="exportDataInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
-        <a class="sin-btn" @click="loadFileBtn">上传EXCEL文件</a>
+        <input ref="exportDataInput" type="file" @change="changeInput" class="exportDataInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
+		<div ref="exportDataDashboard" class="dashboard" v-show="draggableStatus">上传文件拖拽区域</div>
+        <a class="sin-btn" @click="loadFileBtn" v-if="!draggableStatus">上传EXCEL文件</a>
     </div>
 </template>
 
@@ -16,6 +17,7 @@ export default {
         return {
             exportDataArr: [], //Excel文件解析数据
             usedArr: [], //已经被使用过的数据
+            draggableStatus: true, //浏览器是否支持拖拽事件
         };
     },
     watch:{
@@ -36,23 +38,30 @@ export default {
             this.usedArr = [];
             this.$refs.exportDataInput.click();
         },
-        // 解析上传文件
-        exportData(event) {
+        changeInput(event) {
             if(!event.currentTarget.files.length) { 
                 return;
             }
-            const that = this;
             // 拿取文件对象
-            var f = event.currentTarget.files[0];
+            var f = event.currentTarget.files;
+            this.exportData(f);
+        },
+        // 解析上传文件
+        exportData(files) {
+            if(!files.length) { 
+                return;
+            }
+            // 拿取文件对象
+            var f = files[0];
             // 用FileReader来读取
             var reader = new FileReader();
             // 重写FileReader上的readAsBinaryString方法
-            FileReader.prototype.readAsBinaryString = function(f) {
+            FileReader.prototype.readAsBinaryString = (f) => {
                 var binary = "";
                 var wb; // 读取完成的数据
                 var outdata; // 你需要的数据
                 var reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = (e) => {
                     // 读取成Uint8Array，再转换为Unicode编码（Unicode占两个字节）
                     var bytes = new Uint8Array(reader.result);
                     var length = bytes.byteLength;
@@ -66,10 +75,10 @@ export default {
                     outdata = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                     // 自定义方法向父组件传递数据
                     let result = {
-                        data: that.initData(outdata),
-                        total: that.exportDataArr.length
+                        data: this.initData(outdata),
+                        total: this.exportDataArr.length
                     };
-                    that.$emit("postData", result);
+                    this.$emit("postData", result);
                 };
                 reader.readAsArrayBuffer(f);
             };
@@ -125,7 +134,9 @@ export default {
                 'fourLevelDepartment': data['四级部门'],
                 'post': data['任职职位'],
                 'birthday': this.formatDate(data['出生日期']),
-                'education': (data['学历']||'-')+(data['院校层级']||'-')+(data['毕业时间']||'-'),
+                'education': data['学历']||'-',
+                'institutionalLevel': data['院校层级']||'-',
+                'graduationTime': data['毕业时间']||'-',
                 'dateOfEntry': this.formatDate(data['入职日期']),
                 'workingPlace': data['工作地点'],
                 'directSuperior': data['直接上级'],
@@ -149,11 +160,45 @@ export default {
                 return year + format + month + format + date;
             }
             return year+(month < 10 ? '0' + month : month)+(date < 10 ? '0' + date : date);
+        },
+        initDashboard() {
+            let dashboard = this.$refs.exportDataDashboard;
+            let support = ('draggable' in dashboard) || ('ondrapstart' in dashboard && 'ondrop' in dashboard);
+            if(!support){
+                //浏览器不支持HTML5拖放
+                this.draggableStatus = false;
+                return;
+            } else {
+                this.draggableStatus = true;
+            }
+
+            dashboard.addEventListener("dragover", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            dashboard.addEventListener("dragenter", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            dashboard.addEventListener("drop",  (e) => {
+                // 必须要禁用浏览器默认事件
+                e.preventDefault();
+                e.stopPropagation();
+                var files = e.dataTransfer.files;
+                this.exportData(files);
+                // var reader = new FileReader()
+                // reader.readAsText(files[0], 'utf-8')
+                // reader.onload = function (evt) {
+                //     var text = evt.target.result
+                //     dashboard.innerText = text
+                // }
+            });
         }
     },
     computed: {
     },
     mounted() {
+        this.initDashboard();
     },
     created() {
     },
@@ -168,6 +213,28 @@ export default {
     display: inline-block;
     .exportDataInput {
         display: none;
+    }
+    
+    .dashboard {
+        width: 200px;
+        height: 100px;
+        margin-left: 20px;
+        box-sizing: border-box;
+        border: 3px dashed #F8BBD0;
+        border-radius: 5px;
+        font-size: 20px;
+        color: #2c1612;
+        cursor: default;
+        user-select: none;
+        text-align: center;
+        padding: 39px 0;
+        font-size: 16px;
+        line-height: 1;
+        color: rgb(148, 145, 145);
+
+        &:hover {
+            border-color: rgb(25, 159, 192);
+        }
     }
 }
 </style>

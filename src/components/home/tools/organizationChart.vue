@@ -20,6 +20,9 @@ export default {
             boxPadding: 10,
             textArr: [
                 {
+                    title: '二级部门',
+                    value: 'twoLevelDepartment'
+                },{
                     title: '工号',
                     value: 'jobNumber'
                 },{
@@ -28,6 +31,12 @@ export default {
                 },{
                     title: '学历',
                     value: 'education'
+                },{
+                    title: '院校层级',
+                    value: 'institutionalLevel'
+                },{
+                    title: '毕业时间',
+                    value: 'educationyear'
                 },{
                     title: '入职日期',
                     value: 'dateOfEntry'
@@ -141,7 +150,7 @@ export default {
                 // Add new links
                 link.enter()
                     .append("path")
-                    .attr("style", "fill: none;stroke: #ccc;stroke-width: 1.5px;");
+                    .attr("style", "fill: none;stroke: #ccc;stroke-width: 3px;");
 
                 // Remove any links we don't need anymore
                 // if part of the tree was collapsed
@@ -264,7 +273,7 @@ export default {
                 // 矩形背景色以及边框颜色宽度
                 .attr("fill", "#fff")
                 .attr("stroke", "steelblue")
-                .attr("strokeWidth", "1px")
+                .attr("stroke-width", "2")
                 .on("click", function(evt) {
                     console.log(evt); // 显示所点击节点数据
                 });
@@ -340,9 +349,9 @@ export default {
         height: 500px;
         position: absolute;
         // .node circle {
-            // fill: #fff;
-            // stroke: steelblue;
-            // stroke-width: 1.5px;
+        //     fill: #fff;
+        //     stroke: steelblue;
+        //     stroke-width: 3px;
         // }
     }
     .organizationChart-canvas2 {

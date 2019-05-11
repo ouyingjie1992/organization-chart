@@ -6,9 +6,9 @@
                 <a class="sin-btn" href="static/temp/组织架构图模版.xlsx" download="组织架构图模版">下载模版</a>
                 <v-exportData @postData="getResult"></v-exportData>
             </div>
-            <div>
+            <div class="resultData-box">
                 成功导入 {{total}} 条数据
-                <a class="sin-btn" @click="download">下载</a>
+                <a class="sin-btn" @click="download">下载图片</a>
             </div>
             <div class="organization-chart">
                 <v-chart :data="resultData" id="organization-chart-body"></v-chart>
@@ -132,6 +132,9 @@ export default {
         }
         .organization-chart {
         }
+    }
+    .resultData-box {
+        padding: 20px 0;
     }
 }
 </style>
