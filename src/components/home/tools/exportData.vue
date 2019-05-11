@@ -52,7 +52,30 @@ export default {
                 return;
             }
             // 拿取文件对象
-            var f = files[0];
+            let f = files[0];
+
+            let fileName = '';
+            let fileSize = '';
+            let fileType = '';
+            fileName = f.name;
+            //kb
+            if(f.size > 104857600) {
+                this.$msg.error('上传文件不可大于100M，请重新选择');
+                this.$refs.inputer.value = '';
+                return false;
+            } else if(f.size/1024 < 1000) {
+                fileSize = (f.size/1024).toFixed(2) +"kb";
+            } else if(f.size/1024 > 1000) {
+                fileSize = ((f.size/1024)/1024).toFixed(2) +"MB";
+            }
+            let arr = fileName.split('.');
+            fileType = arr[arr.length-1];
+            if(fileType!='xlsx' && fileType!='xls') {
+                this.$msg.error('请选择xls,xlsx格式的文件');
+                this.$refs.exportDataInput.value = '';
+                return false;
+            }
+
             // 用FileReader来读取
             var reader = new FileReader();
             // 重写FileReader上的readAsBinaryString方法
@@ -186,12 +209,6 @@ export default {
                 e.stopPropagation();
                 var files = e.dataTransfer.files;
                 this.exportData(files);
-                // var reader = new FileReader()
-                // reader.readAsText(files[0], 'utf-8')
-                // reader.onload = function (evt) {
-                //     var text = evt.target.result
-                //     dashboard.innerText = text
-                // }
             });
         }
     },
