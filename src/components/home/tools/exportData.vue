@@ -34,8 +34,6 @@ export default {
         // 上传文件按钮
         loadFileBtn() {
             this.$refs.exportDataInput.value = '';
-            this.exportDataArr = [];
-            this.usedArr = [];
             this.$refs.exportDataInput.click();
         },
         changeInput(event) {
@@ -51,6 +49,8 @@ export default {
             if(!files.length) { 
                 return;
             }
+            this.exportDataArr = [];
+            this.usedArr = [];
             // 拿取文件对象
             let f = files[0];
 

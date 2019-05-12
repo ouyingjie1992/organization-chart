@@ -8,7 +8,7 @@
             </div>
             <div class="resultData-box">
                 成功导入 {{resultData.length}}个部门数据， 共计{{total}} 条数据
-                <a class="sin-btn" @click="download(item)" v-for="(item, index) in $refs['organization-chart-body']">下载图片{{index+1}}</a>
+                <a class="sin-btn" @click="download(index)" v-for="(item, index) in resultData">下载图片{{index+1}}</a>
             </div>
             <div class="organization-chart" v-for="item in resultData" >
                 <v-chart :data="item" ref="organization-chart-body"></v-chart>
@@ -48,8 +48,8 @@ export default {
             this.total = result.total;
         },
         // 下载svg
-        download(chart) {
-            let svg = chart.$refs.organizationChart2.children[0];
+        download(index) {
+            let svg = this.$refs['organization-chart-body'][index].$refs.organizationChart2.children[0];
             if (svg == null) {
                 this.$msg.error("请先上传文件");
                 return false;
