@@ -1,7 +1,7 @@
 <template>
     <div class="exportData">
         <input ref="exportDataInput" type="file" @change="changeInput" class="exportDataInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
-		<div ref="exportDataDashboard" class="dashboard" v-show="draggableStatus">上传文件拖拽区域</div>
+		<div ref="exportDataDashboard" class="dashboard" v-show="draggableStatus" @click="loadFileBtn">上传文件拖拽区域</div>
         <a class="sin-btn" @click="loadFileBtn" v-if="!draggableStatus">上传EXCEL文件</a>
     </div>
 </template>
@@ -109,21 +109,24 @@ export default {
         },
         // 格式化数据
         initData(data) {
-            let result = {};
+            let result = [];
             let resultNameArr = [];
-            // 根节点-最高领导
-            let leader = null;
+            // 根节点-最高领导 ： 没有上级领导的即为该部门的最高领导
+            let leader = [];
             if(data != null) {
                 for(let i=0; i<data.length; i++) {
                     let item = this.formatDataName(data[i]);
                     this.exportDataArr.push(item);
                     if(item.directSuperior==null || item.directSuperior==='') {
-                        leader = item;
+                        leader.push(item);
                     }
                 }
-                this.usedArr.push(leader.fullName);
-                leader.children = this.findChildren(leader.fullName);
-                result = leader;
+                for(let i=0; i<leader.length; i++) {
+                    let item = leader[i];
+                    this.usedArr.push(item.fullName);
+                    item.children = this.findChildren(item.fullName);
+                    result.push(item);
+                }
             }
             return result;
         },
@@ -241,7 +244,7 @@ export default {
         border-radius: 5px;
         font-size: 20px;
         color: #2c1612;
-        cursor: default;
+        cursor: pointer;
         user-select: none;
         text-align: center;
         padding: 39px 0;

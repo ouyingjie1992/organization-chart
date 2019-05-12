@@ -7,11 +7,11 @@
                 <v-exportData @postData="getResult"></v-exportData>
             </div>
             <div class="resultData-box">
-                成功导入 {{total}} 条数据
-                <a class="sin-btn" @click="download">下载图片</a>
+                成功导入 {{resultData.length}}个部门数据， 共计{{total}} 条数据
+                <a class="sin-btn" @click="download(item)" v-for="(item, index) in $refs['organization-chart-body']">下载图片{{index+1}}</a>
             </div>
-            <div class="organization-chart">
-                <v-chart :data="resultData" id="organization-chart-body"></v-chart>
+            <div class="organization-chart" v-for="item in resultData" >
+                <v-chart :data="item" ref="organization-chart-body"></v-chart>
             </div>
         </div>
     </div>
@@ -48,10 +48,8 @@ export default {
             this.total = result.total;
         },
         // 下载svg
-        download() {
-            let svg = document
-                .getElementById("organizationChart2")
-                .querySelector("svg");
+        download(chart) {
+            let svg = chart.$refs.organizationChart2.children[0];
             if (svg == null) {
                 this.$msg.error("请先上传文件");
                 return false;
@@ -131,6 +129,7 @@ export default {
         .fnBtns {
         }
         .organization-chart {
+            overflow: auto;
         }
     }
     .resultData-box {

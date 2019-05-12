@@ -1,7 +1,7 @@
 <template>
     <div class="organizationChart">
-        <div class="organizationChart-canvas" id="organizationChart" ref="organizationChart"></div>
-        <div class="organizationChart-canvas2" id="organizationChart2" ref="organizationChart2"></div>
+        <div class="organizationChart-canvas" :id="'organizationChart' + uuid" ref="organizationChart"></div>
+        <div class="organizationChart-canvas2" :id="'organizationChart2' + uuid" ref="organizationChart2"></div>
     </div>
 </template>
 
@@ -13,11 +13,14 @@ export default {
     data() {
         return {
             dataList: {},
+            breadthArr: [], // 树的分级数组
             height: 500,
             width: 800,
             // 单个节点的文字定宽
             fontSize: 16,
             boxPadding: 10,
+            bordeWidth: 3,
+            uuid: this.$generateUUID(),
             textArr: [
                 {
                     title: '二级部门',
@@ -64,6 +67,7 @@ export default {
             immediate:true,
             handler:function(val){
                 this.dataList = val;
+                this.breadthArr = this.breadthTraversal([val]);
                 this.height = this.calMaxHeight();
                 this.width = this.calMaxWidth();
                 this.loadChart();
@@ -81,7 +85,8 @@ export default {
             });
         },
         initChart(ele) {
-            const _this = this;
+            this.height = this.calMaxHeight();
+            this.width = this.calMaxWidth();
             // 清空画布
             if(this.$refs[ele] != null) {
                 this.$refs[ele].innerHTML = '';
@@ -115,7 +120,7 @@ export default {
                     );
                 });
             var svg = d3
-                .select("#"+ele)
+                .select("#"+ele+this.uuid)
                 .append("svg")
                 .attr("width", this.width + 80) // 画布扩大，防止边缘文字被遮挡
                 .attr("height", this.height + this.calNodeHeight()*2)
@@ -135,9 +140,8 @@ export default {
             //  .attr("class", "link")
             //  .attr("d", diagonal);
 
-            drawLine();
             // 将曲线换为折线
-            function drawLine() {
+            const drawLine = () => {
                 var link = svg
                     .selectAll("path.link")
 
@@ -150,7 +154,7 @@ export default {
                 // Add new links
                 link.enter()
                     .append("path")
-                    .attr("style", "fill: none;stroke: #ccc;stroke-width: 3px;");
+                    .attr("style", "fill: none;stroke: #ccc;stroke-width: " + this.bordeWidth + "px;");
 
                 // Remove any links we don't need anymore
                 // if part of the tree was collapsed
@@ -179,6 +183,9 @@ export default {
                     );
                 }
             }
+
+            drawLine();
+
             var node = svg
                 .selectAll(".node")
                 .data(nodes)
@@ -194,32 +201,25 @@ export default {
         },
         // 计算画布宽度
         calMaxWidth() {
-            const data = this.dataList;
             // 画布最小宽度
             const minWidth = 800;
             // 计算画布宽度=所有末节点的宽度相加
             let maxWidth = 0;
             // 节点间的预留间距
-            const nodeMargin = 0;
-            let number = 0;
+            const nodeMargin = 10;
+
             // 同级节点文案最大长度
             let itemLength = 0;
-            const fn = (data) => {
-                for(let i=0; i<data.children.length; i++) {
-                    let item = data.children[i];
-                    if(item.children==null || item.children.length===0) {
-                        itemLength = Math.max(itemLength, this.calNodeWidth(item));
-                        number++;
-                    } else {
-                        fn(item);
-                    }
+            for(let i=0; i<this.breadthArr.length; i++) {
+                let width = 0;
+                let item = this.breadthArr[i].arr;
+                for(let j=0; j<item.length; j++) {
+                    itemLength = Math.max(itemLength, this.calNodeWidth(item[j]));
                 }
-            };
-
-            if(data.children!=null && data.children.length>0) {
-                fn(data);
+                width = itemLength * item.length;
+                maxWidth = Math.max(maxWidth, width);
             }
-            maxWidth = maxWidth + number*itemLength;
+            
             return Math.max(maxWidth, minWidth);
         },
         // 计算画布高度
@@ -258,17 +258,16 @@ export default {
         },
         // 绘制矩形与文字
         drawRect(node) {
-            const _this = this;
             node.append("rect")
                 .attr("y", 0)
-                .attr("x", function(d) {
-                    return -(_this.calNodeWidth(d) / 2);
+                .attr("x", (d) => {
+                    return -(this.calNodeWidth(d) / 2);
                 })
-                .attr("width", function(d) {
-                    return _this.calNodeWidth(d);
+                .attr("width", (d) => {
+                    return this.calNodeWidth(d);
                 })
-                .attr("height", function(d) {
-                    return _this.calNodeHeight();
+                .attr("height", (d) => {
+                    return this.calNodeHeight();
                 })
                 // 矩形背景色以及边框颜色宽度
                 .attr("fill", "#fff")
@@ -280,32 +279,32 @@ export default {
 
             // 新增text
             node.append("text")
-                .attr("y", function(d) {
-                    return (_this.fontSize+4);
+                .attr("y", (d) => {
+                    return (this.fontSize+4);
                 })
-                .attr("style", function(d) {
+                .attr("style", (d) => {
                     return "font-weight: bold;";
                 })
-                .attr("text-anchor", function(d) {
+                .attr("text-anchor", (d) => {
                     return "middle";
                 })
-                .text(function(d) {
-                    return _this.getTitle(d);
+                .text((d) => {
+                    return this.getTitle(d);
                 });
             const addText = (node, lineHeight, numberIndex) => {
 
                 node.append("text")
-                    .attr("y", function(d) {
+                    .attr("y", (d) => {
                         return lineHeight;
                     })
-                    .attr("x", function(d) {
-                        return -(_this.calNodeWidth(d) / 2) + _this.boxPadding;
+                    .attr("x", (d) => {
+                        return -(this.calNodeWidth(d) / 2) + this.boxPadding;
                     })
-                    .attr("text-anchor", function(d) {
+                    .attr("text-anchor", (d) => {
                         return "start";
                     })
-                    .text(function(d) {
-                        return _this.textArr[numberIndex].title + '：' + (d[_this.textArr[numberIndex].value]||'-');
+                    .text((d) => {
+                        return this.textArr[numberIndex].title + '：' + (d[this.textArr[numberIndex].value]||'-');
                     });
             };
             for(let i=0; i<this.textArr.length; i++) {
@@ -321,13 +320,46 @@ export default {
                 maxWidth = Math.max(maxWidth, (item.title + '：' + (d[item.value]||'-')).length);
             }
             maxWidth = Math.max(maxWidth, (d.post + ' ' + d.fullName).length);
-            // 最大字数 * 单个字宽 + 内边距
-            return maxWidth * (this.fontSize+1) + this.boxPadding * 2;
+            // 最大字数 * 单个字宽 + 内边距 + 边框宽度
+            return maxWidth * (this.fontSize + 1) + (this.boxPadding + this.bordeWidth) * 2;
         },
         // 计算单个矩形高度
         calNodeHeight() {
             // 信息行数 * 行高 + 内边距
             return (this.textArr.length+1) * (this.fontSize+4) + 20;
+        },
+
+        // 广度遍历树，并分级。
+        breadthTraversal(data) {
+            if(data == null) {
+                return [];
+            }
+            let result = [];
+            let index = 0;
+            // 深拷贝
+            const resultParents = JSON.parse(JSON.stringify(data));
+
+            const fn = (resultParents) => {
+                if(resultParents.length > 0) {
+                    result.push({
+                        arr: resultParents,
+                        index: index
+                    });
+                    index++;
+                    let resultChildren = [];
+                    for(let i=0; i<resultParents.length; i++) {
+                        let item = resultParents[i];
+                        if(item.children!=null && item.children.length>0) {
+                            resultChildren.push(...item.children);
+                        }
+                    }
+                    fn(resultChildren);
+                }
+            };
+            
+            fn(resultParents);
+
+            return result;
         },
     },
     computed: {},
@@ -347,7 +379,7 @@ export default {
     .organizationChart-canvas {
         width: 1000px;
         height: 500px;
-        position: absolute;
+        position: relative;
         // .node circle {
         //     fill: #fff;
         //     stroke: steelblue;
