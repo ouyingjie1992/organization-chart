@@ -3,6 +3,7 @@
 import Vue from 'vue';
 import 'element-ui/lib/theme-chalk/index.css';
 import App from './App';
+import store from './store';
 import router from './router';
 import ElementUI from 'element-ui';
 
@@ -78,6 +79,7 @@ Vue.prototype.$generateUUID = function() {
 new Vue({
     el: '#app',
     router,
+    store,
     components: { App },
     template: '<App/>'
 })

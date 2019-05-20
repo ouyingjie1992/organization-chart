@@ -1,15 +1,16 @@
 <template>
     <div class="organizationChart">
-        <div class="organizationChart-canvas" :id="'organizationChart' + uuid" ref="organizationChart"></div>
+        <!-- <div class="organizationChart-canvas" :id="'organizationChart' + uuid" ref="organizationChart"></div> -->
         <div class="organizationChart-canvas2" :id="'organizationChart2' + uuid" ref="organizationChart2"></div>
     </div>
 </template>
 
 <script>
 import * as d3 from "d3";
+import {mapState} from 'vuex';
 export default {
     name: "organizationChart",
-    props: ["data"],
+    props: ["data", "showList"],
     data() {
         return {
             dataList: {},
@@ -17,50 +18,17 @@ export default {
             height: 500,
             width: 800,
             // 单个节点的文字定宽
-            fontSize: 16,
-            boxPadding: 10,
+            fontSize: 26,
+            boxPadding: 20,
+            boxMagin: 20,
             bordeWidth: 3,
             uuid: this.$generateUUID(),
-            textArr: [
-                {
-                    title: '二级部门',
-                    value: 'twoLevelDepartment'
-                },{
-                    title: '工号',
-                    value: 'jobNumber'
-                },{
-                    title: '出生日期',
-                    value: 'birthday'
-                },{
-                    title: '学历',
-                    value: 'education'
-                },{
-                    title: '院校层级',
-                    value: 'institutionalLevel'
-                },{
-                    title: '毕业时间',
-                    value: 'educationyear'
-                },{
-                    title: '入职日期',
-                    value: 'dateOfEntry'
-                },{
-                    title: '工作地点',
-                    value: 'workingPlace'
-                },{
-                    title: '直接上级',
-                    value: 'directSuperior'
-                },{
-                    title: '目前月薪',
-                    value: 'currentMonthlySalary'
-                },{
-                    title: '能力等级',
-                    value: 'abilityLevel'
-                },{
-                    title: '绩效',
-                    value: 'performance'
-                }
-            ]
+            textArr: this.$store.state.tData.showList, //展示项
+            showArr: [],//
         };
+    },
+    computed: {
+        ...mapState(['tData'])
     },
     watch: {
         data:{
@@ -68,8 +36,13 @@ export default {
             handler:function(val){
                 this.dataList = val;
                 this.breadthArr = this.breadthTraversal([val]);
-                this.height = this.calMaxHeight();
-                this.width = this.calMaxWidth();
+                this.loadChart();
+            }
+        },
+        showList:{
+            immediate:true,
+            handler:function(val){
+                this.showArr = val||[];
                 this.loadChart();
             }
         },
@@ -77,12 +50,8 @@ export default {
     filters: {},
     methods: {
         loadChart() {
-            this.fontSize = 16;
-            this.initChart('organizationChart');
-            this.$nextTick(()=>{
-                this.fontSize = 26;
-                this.initChart('organizationChart2');
-            });
+            this.fontSize = 26;
+            this.initChart('organizationChart2');
         },
         initChart(ele) {
             this.height = this.calMaxHeight();
@@ -216,7 +185,7 @@ export default {
                 for(let j=0; j<item.length; j++) {
                     itemLength = Math.max(itemLength, this.calNodeWidth(item[j]));
                 }
-                width = itemLength * item.length;
+                width = (itemLength + this.boxMagin) * item.length;
                 maxWidth = Math.max(maxWidth, width);
             }
             
@@ -274,7 +243,7 @@ export default {
                 .attr("stroke", "steelblue")
                 .attr("stroke-width", "2")
                 .on("click", function(evt) {
-                    console.log(evt); // 显示所点击节点数据
+                    // console.log(evt); // 显示所点击节点数据
                 });
 
             // 新增text
@@ -307,8 +276,13 @@ export default {
                         return this.textArr[numberIndex].title + '：' + (d[this.textArr[numberIndex].value]||'-');
                     });
             };
+            let lineHeight = this.fontSize+4;
             for(let i=0; i<this.textArr.length; i++) {
-                let lineHeight = (this.fontSize+4) * (i+2);
+                if(this.showArr.indexOf(this.textArr[i].value) === -1) {
+                    // 此项不展示
+                    continue;
+                }
+                lineHeight += this.fontSize+4;
                 addText(node, lineHeight, i);
             }
         },
@@ -317,6 +291,9 @@ export default {
             let maxWidth = 0;
             for(let i=0; i<this.textArr.length; i++) {
                 let item = this.textArr[i];
+                if(this.showArr.indexOf(item.value) === -1) {
+                    continue;
+                }
                 maxWidth = Math.max(maxWidth, (item.title + '：' + (d[item.value]||'-')).length);
             }
             maxWidth = Math.max(maxWidth, (d.post + ' ' + d.fullName).length);
@@ -326,7 +303,7 @@ export default {
         // 计算单个矩形高度
         calNodeHeight() {
             // 信息行数 * 行高 + 内边距
-            return (this.textArr.length+1) * (this.fontSize+4) + 20;
+            return (this.showArr.length+1) * (this.fontSize+4) + 20;
         },
 
         // 广度遍历树，并分级。
@@ -362,7 +339,6 @@ export default {
             return result;
         },
     },
-    computed: {},
     mounted() {
         this.loadChart();
     },

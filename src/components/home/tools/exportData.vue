@@ -159,7 +159,7 @@ export default {
                 'threeLevelDepartment': data['三级部门'],
                 'fourLevelDepartment': data['四级部门'],
                 'post': data['任职职位'],
-                'birthday': this.formatDate(data['出生日期']),
+                'birthday': this.formatDate(data['出生日期'], 'yyyy'),
                 'education': data['学历']||'-',
                 'institutionalLevel': data['院校层级']||'-',
                 'graduationTime': data['毕业时间']||'-',
@@ -168,12 +168,14 @@ export default {
                 'directSuperior': data['直接上级'],
                 'currentMonthlySalary': data['目前月薪'],
                 'abilityLevel': data['能力等级'],
+                'recentSalary': this.formatDate(data['最近调薪时间']),
                 'performance': '0'+(data['上年度绩效']||'-')+'1'+(data['Q1绩效']||'-')+'2'+(data['Q2绩效']||'-')+'3'+(data['Q3绩效']||'-')+'4'+(data['年度绩效']||'-'),
             };
             return resultData;
         },
         // 日期格式转化
         formatDate(numb, format) {
+            let result = '';
             if(numb == null) {
                 return '-';
             }
@@ -182,10 +184,12 @@ export default {
             let year = time.getFullYear() + '';
             let month = time.getMonth() + 1 + '';
             let date = time.getDate() + '';
-            if(format && format.length === 1) {
-                return year + format + month + format + date;
+            if(format && format === 'yyyy') {
+                return year;
+            } else {
+                result = year+(month < 10 ? '0' + month : month)+(date < 10 ? '0' + date : date);
             }
-            return year+(month < 10 ? '0' + month : month)+(date < 10 ? '0' + date : date);
+            return result;
         },
         initDashboard() {
             let dashboard = this.$refs.exportDataDashboard;
@@ -236,7 +240,7 @@ export default {
     }
     
     .dashboard {
-        width: 200px;
+        width: 100%;
         height: 100px;
         margin-left: 20px;
         box-sizing: border-box;
