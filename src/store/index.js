@@ -7,44 +7,44 @@ let tData = {
     showList: [
 
         {
-            title: '二级部门',
+            title: 'J',
+            value: 'post'
+        }, {
+            title: 'D2',
             value: 'twoLevelDepartment'
         }, {
             title: '工号',
             value: 'jobNumber'
         }, {
-            title: '出生日期',
+            title: 'B',
             value: 'birthday'
         }, {
-            title: '学历',
+            title: 'E',
             value: 'education'
         }, {
-            title: '院校层级',
-            value: 'institutionalLevel'
-        }, {
-            title: '毕业时间',
+            title: 'G',
             value: 'graduationTime'
         }, {
-            title: '入职日期',
+            title: 'OD',
             value: 'dateOfEntry'
         }, {
-            title: '工作地点',
+            title: 'L',
             value: 'workingPlace'
         }, {
-            title: '直接上级',
-            value: 'directSuperior'
-        }, {
-            title: '目前月薪',
+            title: 'P',
             value: 'currentMonthlySalary'
         }, {
-            title: '最近调薪时间',
+            title: 'PT',
             value: 'recentSalary'
         }, {
-            title: '能力等级',
+            title: 'PJ',
             value: 'abilityLevel'
         }, {
             title: '绩效',
             value: 'performance'
+        }, {
+            title: 'ps',
+            value: 'ps'
         }
     ]
 

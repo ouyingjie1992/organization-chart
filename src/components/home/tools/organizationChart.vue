@@ -160,7 +160,7 @@ export default {
                 .data(nodes)
                 .enter()
                 .append("g")
-                .attr("style", "font: "+this.fontSize+"px sans-serif;")
+                .attr("style", "font: " + this.fontSize + "px sans-serif;")
                 .attr("transform", function(d) {
                     return "translate(" + d.x + "," + (d.y-100) + ")"; // edited
                 });
@@ -223,7 +223,7 @@ export default {
         },
         // 节点第一行展示信息
         getTitle(d) {
-            return d.post + ' ' + d.fullName;
+            return d.fullName;
         },
         // 绘制矩形与文字
         drawRect(node) {
@@ -249,10 +249,10 @@ export default {
             // 新增text
             node.append("text")
                 .attr("y", (d) => {
-                    return (this.fontSize+4);
+                    return (this.fontSize*1.4 + 4);
                 })
                 .attr("style", (d) => {
-                    return "font-weight: bold;";
+                    return "font-weight: bold; font-size: " + this.fontSize*1.4 + "px";
                 })
                 .attr("text-anchor", (d) => {
                     return "middle";
@@ -273,7 +273,7 @@ export default {
                         return "start";
                     })
                     .text((d) => {
-                        return this.textArr[numberIndex].title + '：' + (d[this.textArr[numberIndex].value]||'-');
+                        return (this.textArr[numberIndex].title=='绩效'?'':this.textArr[numberIndex].title + '：') + (d[this.textArr[numberIndex].value]||'-');
                     });
             };
             let lineHeight = this.fontSize+4;
@@ -282,28 +282,41 @@ export default {
                     // 此项不展示
                     continue;
                 }
-                lineHeight += this.fontSize+4;
+                if(i === 0) {
+                    lineHeight += this.fontSize*1.4 + 4 + 10;
+                } else {
+                    lineHeight += this.fontSize + 4;
+                }
                 addText(node, lineHeight, i);
             }
         },
         // 计算单个矩形宽度
         calNodeWidth(d) {
+            // 计算宽度
+            const calWidth = (word) => {
+                let result = 0;
+                // 用font-size=26px算，英文字符宽是中文的0.5
+                let english = this.getLength(word);
+                // 宽度 = 字数 * 单个中文字符宽 - 英文字符的差宽
+                result = (word.length - english * 0.5) * (this.fontSize + 1);
+                return result;
+            }; 
             let maxWidth = 0;
             for(let i=0; i<this.textArr.length; i++) {
                 let item = this.textArr[i];
                 if(this.showArr.indexOf(item.value) === -1) {
                     continue;
                 }
-                maxWidth = Math.max(maxWidth, (item.title + '：' + (d[item.value]||'-')).length);
+                maxWidth = Math.max(maxWidth, calWidth(item.title + '：' + (d[item.value]||'-')));
             }
-            maxWidth = Math.max(maxWidth, (d.post + ' ' + d.fullName).length);
-            // 最大字数 * 单个字宽 + 内边距 + 边框宽度
-            return maxWidth * (this.fontSize + 1) + (this.boxPadding + this.bordeWidth) * 2;
+            maxWidth = Math.max(maxWidth, calWidth(this.getTitle(d))*1.4);
+            // 最大文案宽 + 内边距 + 边框宽度
+            return maxWidth + (this.boxPadding + this.bordeWidth) * 2;
         },
         // 计算单个矩形高度
         calNodeHeight() {
-            // 信息行数 * 行高 + 内边距
-            return (this.showArr.length+1) * (this.fontSize+4) + 20;
+            // 信息行数 * 行高 + 内边距  +  首行高度
+            return (this.showArr.length) * (this.fontSize+4) + 20 + (this.fontSize*1.4+4);
         },
 
         // 广度遍历树，并分级。
@@ -338,6 +351,14 @@ export default {
 
             return result;
         },
+        // 计算字符串的英文数
+        getLength(str) {
+            if(/[a-z]/i.test(str)){
+                return str.match(/[a-z0-9]/ig).length;
+            } else {
+                return 0;
+            }
+        }
     },
     mounted() {
         this.loadChart();

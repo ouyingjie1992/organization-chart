@@ -154,22 +154,22 @@ export default {
             let resultData = {
                 'jobNumber': data['工号'],
                 'fullName': data['姓名'],
-                'firstLevelDepartment': data['一级部门'],
-                'twoLevelDepartment': data['二级部门'],
-                'threeLevelDepartment': data['三级部门'],
-                'fourLevelDepartment': data['四级部门'],
+                'firstLevelDepartment': data['一级部门（D1）'],
+                'twoLevelDepartment': data['二级部门（D2）'],
+                'threeLevelDepartment': data['三级部门（D3）'],
+                'fourLevelDepartment': data['四级部门（D4）'],
                 'post': data['任职职位'],
-                'birthday': this.formatDate(data['出生日期'], 'yyyy'),
-                'education': data['学历']||'-',
-                'institutionalLevel': data['院校层级']||'-',
-                'graduationTime': data['毕业时间']||'-',
-                'dateOfEntry': this.formatDate(data['入职日期']),
-                'workingPlace': data['工作地点'],
+                'birthday': data['出生日期（B）'],
+                'education': (data['学历']||'-') + '-' + (data['院校层级']||'-'),
+                'graduationTime': data['毕业时间（G）']||'-',
+                'dateOfEntry': this.formatDate(data['入职日期（OD）']),
+                'workingPlace': data['工作地点（L）'],
                 'directSuperior': data['直接上级'],
-                'currentMonthlySalary': data['目前月薪'],
-                'abilityLevel': data['能力等级'],
-                'recentSalary': this.formatDate(data['最近调薪时间']),
+                'currentMonthlySalary': data['目前月薪（P）'],
+                'abilityLevel': data['能力评级（PJ）'],
+                'recentSalary': this.formatDate(data['最近调薪时间（PT）']),
                 'performance': '0'+(data['上年度绩效']||'-')+'1'+(data['Q1绩效']||'-')+'2'+(data['Q2绩效']||'-')+'3'+(data['Q3绩效']||'-')+'4'+(data['年度绩效']||'-'),
+                'ps': data['备注（PS）'],
             };
             return resultData;
         },
@@ -185,7 +185,7 @@ export default {
             let month = time.getMonth() + 1 + '';
             let date = time.getDate() + '';
             if(format && format === 'yyyy') {
-                return year;
+                return year + '年';
             } else {
                 result = year+(month < 10 ? '0' + month : month)+(date < 10 ? '0' + date : date);
             }
@@ -217,7 +217,7 @@ export default {
                 var files = e.dataTransfer.files;
                 this.exportData(files);
             });
-        }
+        },
     },
     computed: {
     },
