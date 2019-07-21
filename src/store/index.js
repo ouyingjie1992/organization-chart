@@ -40,6 +40,9 @@ let tData = {
             title: 'PJ',
             value: 'abilityLevel'
         }, {
+            title: 'QL',
+            value: 'potentialRating'
+        }, {
             title: '绩效',
             value: 'performance'
         }, {

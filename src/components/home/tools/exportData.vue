@@ -160,13 +160,14 @@ export default {
                 'fourLevelDepartment': data['四级部门（D4）'],
                 'post': data['任职职位'],
                 'birthday': data['出生日期（B）'],
-                'education': (data['学历']||'-') + '-' + (data['院校层级']||'-'),
+                'education': (data['学历']||'-') + '-' + (data['学校层次']||'-'),
                 'graduationTime': data['毕业时间（G）']||'-',
                 'dateOfEntry': this.formatDate(data['入职日期（OD）']),
                 'workingPlace': data['工作地点（L）'],
                 'directSuperior': data['直接上级'],
                 'currentMonthlySalary': data['目前月薪（P）'],
                 'abilityLevel': data['能力评级（PJ）'],
+                'potentialRating': data['潜力评级（QL）'],
                 'recentSalary': this.formatDate(data['最近调薪时间（PT）']),
                 'performance': '0'+(data['上年度绩效']||'-')+'1'+(data['Q1绩效']||'-')+'2'+(data['Q2绩效']||'-')+'3'+(data['Q3绩效']||'-')+'4'+(data['年度绩效']||'-'),
                 'ps': data['备注（PS）'],
@@ -181,9 +182,9 @@ export default {
             }
             let time = new Date(1900, 0, numb);
             time.setDate(time.getDate() - 1);
-            let year = time.getFullYear() + '';
-            let month = time.getMonth() + 1 + '';
-            let date = time.getDate() + '';
+            let year = String(time.getFullYear());
+            let month = String(time.getMonth() + 1);
+            let date = String(time.getDate());
             if(format && format === 'yyyy') {
                 return year + '年';
             } else {
@@ -210,7 +211,7 @@ export default {
                 e.preventDefault();
                 e.stopPropagation();
             });
-            dashboard.addEventListener("drop",  (e) => {
+            dashboard.addEventListener("drop", (e) => {
                 // 必须要禁用浏览器默认事件
                 e.preventDefault();
                 e.stopPropagation();
