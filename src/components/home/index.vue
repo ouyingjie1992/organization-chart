@@ -114,11 +114,11 @@ export default {
             while (n--) {
                 u8arr[n] = bstr.charCodeAt(n);
             }
-            return new Blob([u8arr], { type: mime });
+            return new Blob([u8arr], {type: mime});
         },
         downloadCanvas(canvas, name='组织架构图') {
             var link = document.createElement("a");
-            var imgData = canvas.toDataURL({ format: "png", multiplier: 4 });
+            var imgData = canvas.toDataURL({format: "png", multiplier: 4});
             var strDataURI = imgData.substr(22, imgData.length);
             var blob = this.dataURLtoBlob(imgData);
             var objurl = URL.createObjectURL(blob);

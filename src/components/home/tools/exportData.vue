@@ -93,7 +93,8 @@ export default {
                     }
                     // 接下来就是xlsx了，具体可看api
                     wb = XLSX.read(binary, {
-                        type: "binary"
+                        type: "binary",
+                        cellDates: true
                     });
                     outdata = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                     // 自定义方法向父组件传递数据
@@ -162,31 +163,34 @@ export default {
                 'birthday': data['出生日期（B）'],
                 'education': (data['学历']||'-') + '-' + (data['学校层次']||'-'),
                 'graduationTime': data['毕业时间（G）']||'-',
-                'dateOfEntry': this.formatDate(data['入职日期（OD）']),
+                'dateOfEntry': this.formatDate(data['入职日期（OD）'], 'yyyy/mm/dd'),
                 'workingPlace': data['工作地点（L）'],
                 'directSuperior': data['直接上级'],
                 'currentMonthlySalary': data['目前月薪（P）'],
                 'abilityLevel': data['能力评级（PJ）'],
                 'potentialRating': data['潜力评级（QL）'],
-                'recentSalary': this.formatDate(data['最近调薪时间（PT）']),
+                'recentSalary': this.formatDate(data['最近调薪时间（PT）'], 'yyyy年mm月'),
                 'performance': '0'+(data['上年度绩效']||'-')+'1'+(data['Q1绩效']||'-')+'2'+(data['Q2绩效']||'-')+'3'+(data['Q3绩效']||'-')+'4'+(data['年度绩效']||'-'),
                 'ps': data['备注（PS）'],
             };
             return resultData;
         },
         // 日期格式转化
-        formatDate(numb, format) {
+        formatDate(data, format) {
             let result = '';
-            if(numb == null) {
+            if(data == null) {
                 return '-';
             }
-            let time = new Date(1900, 0, numb);
-            time.setDate(time.getDate() - 1);
+            let time = new Date(data);
             let year = String(time.getFullYear());
             let month = String(time.getMonth() + 1);
             let date = String(time.getDate());
             if(format && format === 'yyyy') {
-                return year + '年';
+                result = year + '年';
+            } else if(format && format === 'yyyy/mm/dd') {
+                result = year + '/' + (month < 10 ? '0' + month : month) + '/' +(date < 10 ? '0' + date : date);
+            } else if(format && format === 'yyyy年mm月') {
+                result = year + '年' + (month < 10 ? '0' + month : month) + '月';
             } else {
                 result = year+(month < 10 ? '0' + month : month)+(date < 10 ? '0' + date : date);
             }
