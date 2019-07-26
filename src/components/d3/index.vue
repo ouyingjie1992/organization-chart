@@ -36,10 +36,10 @@
 import JSZip from "jszip";
 import FileSaver from 'file-saver';
 import {mapState} from 'vuex';
-import vExportData from "./tools/exportData";
-import vChart from "./tools/organizationChart";
+import vExportData from "../tools/exportData";
+import vChart from "./organizationChart";
 export default {
-    name: "homePage",
+    name: "d3Page",
     data() {
         return {
             resultData: [], // Excel导入结果

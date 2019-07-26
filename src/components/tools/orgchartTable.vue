@@ -14,12 +14,12 @@
                 </tr>
                 <tr class="lines" v-if="tableList.children.length>0">
                     <td :colspan="calMaxLength(breadthArr) + 1">
-                        <div class="down">
+                        <div class="down" :style="'height: ' + calBorderHeight(tableList) + 'px;'">
                         </div>
                     </td>
                 </tr>
                 <tr class="lines" v-if="tableList.children.length>1">
-                    <td class="right">
+                    <td class="right" style="border-top: 1px solid #fff;">
                         &nbsp;
                     </td>
                     <template v-for="(childrenItem, index) in tableList.children" v-key="childrenItem" v-if="index !== 0">
@@ -36,7 +36,7 @@
                 </tr>
                 <tr class="nodes">
                     <td v-for="tdItem in tableList.children" :colspan="2">
-                        <orgchartTable :dataList="tdItem" :showArr="showArr"></orgchartTable>
+                        <orgchartTable :dataList="tdItem" :showArr="showArr" :levelMaxHeight="levelMaxHeight"></orgchartTable>
                     </td>
                 </tr>
             </tbody>
@@ -47,13 +47,16 @@
 <script>
 export default {
     name: "orgchartTable",
-    props: ["dataList", "showArr"],
+    props: ["dataList", "showArr", "levelMaxHeight"],
     model: {
     },
     data() {
         return {
             tableList: {},
             breadthArr: [], // 树的分级数组
+            boxInitHeight: 40, // 数据框原始高度-只留标题名称
+            boxItemHeight: 16, // 单行数据高度
+            maxHeight: 0, // 默认单行内容区域高
         };
     },
     watch:{
@@ -61,7 +64,8 @@ export default {
             immediate:true,
             handler:function(val){
                 this.tableList = val;
-                this.breadthArr = this.breadthTraversal([val]);
+                this.breadthArr = this.$breadthTraversal([val]);
+                this.maxHeight = this.calMaxHeight();
             }
         },
     },
@@ -78,38 +82,28 @@ export default {
             }
             return maxLength;
         },
-        // 广度遍历树，并分级。
-        breadthTraversal(data) {
-            if(data == null) {
-                return [];
-            }
-            let result = [];
-            let index = 0;
-            // 深拷贝
-            const resultParents = JSON.parse(JSON.stringify(data));
-
-            const fn = (resultParents) => {
-                if(resultParents.length > 0) {
-                    result.push({
-                        arr: resultParents,
-                        index: index
-                    });
-                    index++;
-                    let resultChildren = [];
-                    for(let i=0; i<resultParents.length; i++) {
-                        let item = resultParents[i];
-                        if(item.children!=null && item.children.length>0) {
-                            resultChildren.push(...item.children);
-                        }
-                    }
-                    fn(resultChildren);
+        // 计算连线长度
+        calBorderHeight(data) {
+            let valueLength = 1;
+            let borderHeight = 0;
+            for(let i=0; i<this.showArr.length; i++) {
+                if(data[this.showArr[i].value]!=='' && data[this.showArr[i].value]!=null) {
+                    valueLength++;
                 }
-            };
+            }
+            borderHeight = this.maxHeight - (this.boxInitHeight + this.boxItemHeight * valueLength);
             
-            fn(resultParents);
-
-            return result;
+            return borderHeight;
         },
+        // 计算最长框高
+        calMaxHeight() {
+            let maxHeight = 311;
+            let length = this.levelMaxHeight[this.tableList.level];
+            if(length != null) {
+                maxHeight = this.boxInitHeight + this.boxItemHeight * length + 63;
+            }
+            return maxHeight;
+        }
     },
     computed: {
     },

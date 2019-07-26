@@ -161,8 +161,8 @@ export default {
                 'fourLevelDepartment': data['四级部门（D4）'],
                 'post': data['任职职位'],
                 'birthday': data['出生日期（B）'],
-                'education': (data['学历']||'-') + '-' + (data['学校层次']||'-'),
-                'graduationTime': data['毕业时间（G）']||'-',
+                'education': this.initEducation(data),
+                'graduationTime': data['毕业时间（G）'],
                 'dateOfEntry': this.formatDate(data['入职日期（OD）'], 'yyyy/mm/dd'),
                 'workingPlace': data['工作地点（L）'],
                 'directSuperior': data['直接上级'],
@@ -170,7 +170,7 @@ export default {
                 'abilityLevel': data['能力评级（PJ）'],
                 'potentialRating': data['潜力评级（QL）'],
                 'recentSalary': this.formatDate(data['最近调薪时间（PT）'], 'yyyy年mm月'),
-                'performance': '0'+(data['上年度绩效']||'-')+'1'+(data['Q1绩效']||'-')+'2'+(data['Q2绩效']||'-')+'3'+(data['Q3绩效']||'-')+'4'+(data['年度绩效']||'-'),
+                'performance': this.initPerformance(data),
                 'ps': data['备注（PS）'],
             };
             return resultData;
@@ -179,7 +179,7 @@ export default {
         formatDate(data, format) {
             let result = '';
             if(data == null) {
-                return '-';
+                return '';
             }
             let time = new Date(data);
             let year = String(time.getFullYear());
@@ -223,6 +223,29 @@ export default {
                 this.exportData(files);
             });
         },
+        // 学历格式化
+        initEducation(data) {
+            let result = '';
+            let data1 = data['学历'];
+            let data2 = data['学校层次'];
+            if((data1!=null&&data1!=='') || (data2!=null&&data2!=='')) {
+                result = (data1||'-') + '-' + (data2||'-');
+            }
+            return result;
+        },
+        // 绩效格式化
+        initPerformance(data) {
+            let result = '';
+            let data1 = data['上年度绩效'];
+            let data2 = data['Q1绩效'];
+            let data3 = data['Q2绩效'];
+            let data4 = data['Q3绩效'];
+            let data5 = data['年度绩效'];
+            if((data1!=null&&data1!=='') || (data2!=null&&data2!=='') || (data3!=null&&data3!=='') || (data4!=null&&data4!=='') || (data5!=null&&data5!=='')) {
+                result = '0'+(data1||'-')+'1'+(data2||'-')+'2'+(data3||'-')+'3'+(data4||'-')+'4'+(data5||'-');
+            }
+            return result;
+        }
     },
     computed: {
     },

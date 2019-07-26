@@ -35,7 +35,8 @@ export default {
             immediate:true,
             handler:function(val){
                 this.dataList = val;
-                this.breadthArr = this.breadthTraversal([val]);
+                // console.log(JSON.stringify(val))
+                this.breadthArr = this.$breadthTraversal([val]);
                 this.loadChart();
             }
         },
@@ -319,38 +320,6 @@ export default {
             return (this.showArr.length) * (this.fontSize+4) + 20 + (this.fontSize*1.4+4);
         },
 
-        // 广度遍历树，并分级。
-        breadthTraversal(data) {
-            if(data == null) {
-                return [];
-            }
-            let result = [];
-            let index = 0;
-            // 深拷贝
-            const resultParents = JSON.parse(JSON.stringify(data));
-
-            const fn = (resultParents) => {
-                if(resultParents.length > 0) {
-                    result.push({
-                        arr: resultParents,
-                        index: index
-                    });
-                    index++;
-                    let resultChildren = [];
-                    for(let i=0; i<resultParents.length; i++) {
-                        let item = resultParents[i];
-                        if(item.children!=null && item.children.length>0) {
-                            resultChildren.push(...item.children);
-                        }
-                    }
-                    fn(resultChildren);
-                }
-            };
-            
-            fn(resultParents);
-
-            return result;
-        },
         // 计算字符串的英文数
         getLength(str) {
             if(/[a-z]/i.test(str)){

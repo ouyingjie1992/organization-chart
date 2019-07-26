@@ -7,7 +7,7 @@ import store from './store';
 import router from './router';
 import ElementUI from 'element-ui';
 
-Vue.use(ElementUI, { size: 'small' });
+Vue.use(ElementUI, {size: 'small'});
 Vue.config.productionTip = false;
 // 覆写element-ui的message提示框
 const msg = {
@@ -21,10 +21,10 @@ const msg = {
         let realOption = {};
         if ((typeof option == 'string') && option.constructor == String || (typeof option == 'number') && option.constructor == Number) {
             // 传参为字符串或者数字
-            realOption = {...this.default, ... { message: option } };
+            realOption = {...this.default, ... {message: option}};
         } else if ((typeof option == 'object') && option.constructor == Object) {
             // 传参为对象
-            realOption = {...this.default, ...option };
+            realOption = {...this.default, ...option};
         } else {
             return false;
         }
@@ -75,11 +75,44 @@ Vue.prototype.$generateUUID = function() {
     return uuid;
 };
 
+// 广度遍历树，并分级。
+Vue.prototype.$breadthTraversal = (data) => {
+    if(data == null) {
+        return [];
+    }
+    let result = [];
+    let index = 0;
+    // 深拷贝
+    const resultParents = JSON.parse(JSON.stringify(data));
+
+    const fn = (resultParents) => {
+        if(resultParents.length > 0) {
+            result.push({
+                arr: resultParents,
+                index: index
+            });
+            index++;
+            let resultChildren = [];
+            for(let i=0; i<resultParents.length; i++) {
+                let item = resultParents[i];
+                if(item.children!=null && item.children.length>0) {
+                    resultChildren.push(...item.children);
+                }
+            }
+            fn(resultChildren);
+        }
+    };
+    
+    fn(resultParents);
+
+    return result;
+};
+
 /* eslint-disable no-new */
 new Vue({
     el: '#app',
     router,
     store,
-    components: { App },
+    components: {App},
     template: '<App/>'
 })
