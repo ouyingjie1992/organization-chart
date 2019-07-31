@@ -3,7 +3,7 @@
         <table>
             <tbody>
                 <tr>
-                    <td :colspan="calMaxLength(breadthArr) + 1">
+                    <td :colspan="calMaxLength(breadthArr)*2">
                         <div class="node">
                             <div class="node-box">
                                 <div class="node-name">{{tableList.fullName}}</div>
@@ -13,7 +13,7 @@
                     </td>
                 </tr>
                 <tr class="lines" v-if="tableList.children.length>0">
-                    <td :colspan="calMaxLength(breadthArr) + 1">
+                    <td :colspan="calMaxLength(breadthArr)*2">
                         <div class="down" :style="'height: ' + calBorderHeight(tableList) + 'px;'">
                         </div>
                     </td>

@@ -52,11 +52,30 @@ let tData = {
     ]
 
 };
+// loading遮罩清除定时器
+let loadingCountSetTime = null;
 const store = new Vuex.Store({
     state: {
         tData: tData, //全局变量
+        loadingCount: 0,//loading遮罩请求计数，>0则展示遮罩
     },
-    mutations: {},
-    actions: {}
+    mutations: {
+        mLoadingCount(state, n) {
+            let val = n;
+            // 预防意外情况下计算错误出现负数，从而影响之后的loading使用
+            if(val < 0) {
+                val = 0;
+            }
+            state.loadingCount = val;
+            // 清除遮罩-定时器，防止特殊场景下遮罩状态错误
+            clearTimeout(loadingCountSetTime);
+            // 超时时间设定与axios.defaults.timeout保持一致
+            const overtime = 60000;
+            loadingCountSetTime = setTimeout(()=>{
+                state.loadingCount = 0;
+            }, overtime);
+        },
+    },
+    actions: {},
 });
 export default store;

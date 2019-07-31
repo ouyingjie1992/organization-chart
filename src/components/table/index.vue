@@ -74,9 +74,13 @@ export default {
                 this.$msg.error("请先上传文件");
                 return false;
             }
-            html2canvas(ele).then((canvas) => {
-                this.downloadCanvas(canvas, department);
-            });
+            this.$loading.show();
+            setTimeout(() => {
+                html2canvas(ele).then((canvas) => {
+                    this.downloadCanvas(canvas, department);
+                    this.$loading.hide();
+                });
+            }, 0);
         },
         dataURLtoBlob(dataurl) {
             var arr = dataurl.split(","),
@@ -112,49 +116,51 @@ export default {
         },
         // 打包下载
         downloadZip() {
-            let zip = new JSZip();
-            let zipName = '组织架构图' + this.initTimeStr();
-            let imgs = zip.folder(zipName);
-            let baseList = [];
-
-
             let charts = this.$refs["organization-chart-body"];
             if (charts==null || charts.length===0) {
                 this.$msg.error("请先上传文件");
                 return false;
             }
+            this.$loading.show();
+            let zip = new JSZip();
+            let zipName = '组织架构图' + this.initTimeStr();
+            let imgs = zip.folder(zipName);
+            let baseList = [];
             for(let i=0; i<charts.length; i++) {
                 let ele = charts[i].$el;
                 let department = this.resultData[i].firstLevelDepartment;
-                html2canvas(ele).then((canvas) => {
-                    let url = canvas.toDataURL() // 得到图片的base64编码数据
-                    // canvas.toDataURL('image/png')
-                    baseList.push({
-                        file: url.substring(22),
-                        name: department
-                    });
-                    if(baseList.length === charts.length) {
-                        if(baseList.length > 0) {
-                            this.$notify({
-                                title: '打包成功',
-                                message: '即将下载',
-                                type: 'success'
-                            });
-                            for (let k = 0; k < baseList.length; k++) {
-                                imgs.file(baseList[k].name + '.png', baseList[k].file, {base64: true});
+                setTimeout(() => {
+                    html2canvas(ele).then((canvas) => {
+                        let url = canvas.toDataURL() // 得到图片的base64编码数据
+                        // canvas.toDataURL('image/png')
+                        baseList.push({
+                            file: url.substring(22),
+                            name: department
+                        });
+                        if(baseList.length === charts.length) {
+                            if(baseList.length > 0) {
+                                this.$notify({
+                                    title: '打包成功',
+                                    message: '即将下载',
+                                    type: 'success'
+                                });
+                                for (let k = 0; k < baseList.length; k++) {
+                                    imgs.file(baseList[k].name + '.png', baseList[k].file, {base64: true});
+                                }
+                                zip.generateAsync({type: 'blob'}).then( (content) => {
+                                    // see FileSaver.js
+                                    FileSaver.saveAs(content, zipName + '.zip');
+                                    this.$loading.hide();
+                                });
+                            } else {
+                                this.$notify.error({
+                                    title: '错误',
+                                    message: '暂无图片可下载'
+                                });
                             }
-                            zip.generateAsync({type: 'blob'}).then( (content) => {
-                                // see FileSaver.js
-                                FileSaver.saveAs(content, zipName + '.zip');
-                            });
-                        } else {
-                            this.$notify.error({
-                                title: '错误',
-                                message: '暂无图片可下载'
-                            });
                         }
-                    }
-                });
+                    });
+                }, 0);
             }
         },
         // 全选展示项

@@ -108,6 +108,19 @@ Vue.prototype.$breadthTraversal = (data) => {
     return result;
 };
 
+// loading
+const loadOj = {
+    // 展示loading遮罩
+    show() {
+        store.commit('mLoadingCount', store.state.loadingCount+1);
+    },
+    // 隐藏loading遮罩
+    hide() {
+        store.commit('mLoadingCount', store.state.loadingCount-1);
+    }
+};
+Vue.prototype.$loading = loadOj;
+
 /* eslint-disable no-new */
 new Vue({
     el: '#app',

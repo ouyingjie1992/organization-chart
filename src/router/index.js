@@ -7,14 +7,25 @@ Vue.use(Router)
 let router = {
     routes: [
         {
-            path: '/d3Page',
-            name: 'd3Page',
-            component: d3Page
+            path: '/',
+            redirect: '/tablePage'
         },
         {
             path: '/',
-            name: 'tablePage',
-            component: tablePage
+            component: resolve => require(['../components/common/Home.vue'], resolve),
+            meta: {title: '自述文件'},
+            children:[
+                {
+                    path: '/d3Page',
+                    name: 'd3Page',
+                    component: d3Page
+                },
+                {
+                    path: '/tablePage',
+                    name: 'tablePage',
+                    component: tablePage
+                },
+            ]
         },
     ]
 };

@@ -76,6 +76,7 @@ export default {
                 return false;
             }
 
+            this.$loading.show();
             // 用FileReader来读取
             var reader = new FileReader();
             // 重写FileReader上的readAsBinaryString方法
@@ -103,6 +104,7 @@ export default {
                         total: this.exportDataArr.length
                     };
                     this.$emit("postData", result);
+                    this.$loading.hide();
                 };
                 reader.readAsArrayBuffer(f);
             };
